@@ -1,5 +1,7 @@
 import Vue from 'vue'
-import { Button, Form, FormItem, Input, Message, Container, Header, Aside, Main } from 'element-ui'
+import {
+    Button, Form, FormItem, Input, Message, Container, Header, Aside, Main, Menu, MenuItem, Submenu, MenuItemGroup
+} from 'element-ui'
 
 // 挂载为Vue上的属性
 Vue.prototype.$message = Message
@@ -13,3 +15,7 @@ Vue.use(Container)
 Vue.use(Header)
 Vue.use(Aside)
 Vue.use(Main)
+Vue.use(Menu)
+Vue.use(MenuItem)
+Vue.use(Submenu)
+Vue.use(MenuItemGroup)
