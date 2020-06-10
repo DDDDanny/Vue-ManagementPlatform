@@ -45,6 +45,16 @@
                     </template>
                 </el-table-column>
             </el-table>
+            <!-- 分页区域 -->
+            <el-pagination
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="queryInfo.pagenum"
+                    :page-sizes="[15, 20, 50, 100]"
+                    :page-size="queryInfo.pagesize"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    :total="total">
+            </el-pagination>
         </el-card>
     </div>
 </template>
@@ -57,10 +67,10 @@
                 queryInfo: {
                     query: '',
                     pagenum: 1,
-                    pagesize: 20
+                    pagesize: 15
                 },
                 userList: [],
-                total: 2
+                total: 0
             }
         },
         created() {
@@ -75,6 +85,17 @@
                 this.userList = res.data.users
                 this.total = res.data.total
                 console.log(res)
+            },
+            // 监听pageSize改变的事件
+            handleSizeChange(newSize){
+                this.queryInfo.pagesize = newSize
+                this.getUserList()
+            },
+            // 监听当前页面页码值改变的事件
+            handleCurrentChange(newPage){
+                this.queryInfo.pagenum = newPage
+                this.getUserList()
+
             }
         }
     }
