@@ -83,6 +83,26 @@
 <script>
     export default {
         data() {
+            // 验证邮箱的规则
+            let checkEmail = (rule, value, callback) => {
+                // 验证邮箱的正则表达式
+                const regEmail = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/
+
+                if (regEmail.test(value)) {
+                    return callback()
+                }
+                callback(new Error('请输入合法的邮箱'))
+            };
+            // 验证手机号的规则
+            let checkMobile = (rule, value, callback) => {
+                // 验证手机号的正则表达式
+                const regMobile = /^(0|86|17951)?(13[0-9]|15[0-9]|17[678]|18[0-9]|14[57])[0-9]{8}$/
+
+                if (regMobile.test(value)) {
+                    return callback()
+                }
+                callback(new Error('请输入合法的手机号'))
+            }
             return {
                 // 获取用户列表参数的对象
                 queryInfo: {
@@ -113,11 +133,12 @@
                     ],
                     email: [
                         { required: true, message: '请输入邮箱', trigger: 'blur'},
+                        { validator: checkEmail, trigger: 'blur' }
                     ],
                     mobile: [
                         { required: true, message: '请输入手机号', trigger: 'blur'},
-                        { min: 11, max: 11, message: '手机号长度错误', trigger: 'blur'}
-
+                        { min: 11, max: 11, message: '手机号长度错误', trigger: 'blur'},
+                        { validator: checkMobile, trigger: 'blur' }
                     ],
                 }
             }
