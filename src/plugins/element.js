@@ -1,11 +1,12 @@
 import Vue from 'vue'
 import {
     Button, Form, FormItem, Input, Message, Container, Header, Aside, Main, Menu, MenuItem, Submenu, MenuItemGroup,
-    Breadcrumb, BreadcrumbItem, Card, Row, Col, Table, TableColumn, Switch, Tooltip, Pagination, Dialog
+    Breadcrumb, BreadcrumbItem, Card, Row, Col, Table, TableColumn, Switch, Tooltip, Pagination, Dialog, MessageBox
 } from 'element-ui'
 
 // 挂载为Vue上的属性
 Vue.prototype.$message = Message
+Vue.prototype.$confirm = MessageBox.confirm
 
 // 注册组件
 Vue.use(Button)
