@@ -33,7 +33,6 @@
                 </el-table-column>
                 <el-table-column label="操作" width="180px">
                     <template slot-scope="scope">
-                        {{ scope.row }}
                         <!-- 编辑按钮 -->
                         <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.id)" ></el-button>
                         <!-- 删除按钮 -->
@@ -92,7 +91,7 @@
             </el-form>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="editDialogVisible = false">取 消</el-button>
-                <el-button type="primary" @click="editDialogVisible = false">确 定</el-button>
+                <el-button type="primary" @click="editUserInfo">确 定</el-button>
              </span>
         </el-dialog>
     </div>
@@ -218,7 +217,7 @@
                 this.$refs.addFormRef.validate(async valid => {
                     if (!valid) return
                     // 发起添加用户网络请求
-                    const {data: res} = await this.$http.post('users', this.addForm)
+                    const {data: res} = await this.$http.post('users/', this.addForm)
                     if (res.meta.status !== 201) {
                         this.$message.error('添加用户失败')
                     }
@@ -240,6 +239,25 @@
             editDialogClosed() {
                 this.$refs.editFormRef.resetFields()
             },
+            // 修改用户信息并提交
+            editUserInfo() {
+                this.$refs.editFormRef.validate(async valid => {
+                    if (!valid) return
+                    // 发起修改信息的网络请求
+                    const {data: res} = await this.$http.put('users/' + this.editForm.id, {
+                        email: this.editForm.email,
+                        mobile: this.editForm.mobile
+                    })
+                    if (res.meta.status !== 200){
+                        return this.$message.error('更新用户信息失败')
+                    }
+                    this.$message.success('更新用户信息成功')
+                    // 隐藏添加用户的对话框
+                    this.editDialogVisible = false
+                    // 重新获取列表数据
+                    this.getUserList()
+                })
+            }
         }
     }
 </script>
