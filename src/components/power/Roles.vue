@@ -17,7 +17,20 @@
             <!-- 角色列表区域 -->
             <el-table :data="roleList" border stripe>
                 <!-- 展开列 -->
-                <el-table-column type="expand" label=""></el-table-column>
+                <el-table-column type="expand" label="">
+                    <template slot-scope="scope">
+                        <el-row v-for="(item1, i1) in scope.row.children" :key="item1.id" :class="['bdbottom', i1 === 0 ? 'dbtop':'']">
+                            <!-- 渲染一级权限 -->
+                            <el-col :span="5">
+                                <el-tag>{{item1.authName}}</el-tag>
+                                <i class="el-icon-caret-right"></i>
+                            </el-col>
+                            <!-- 渲染二、三级权限 -->
+                            <el-col :span="19"></el-col>
+                        </el-row>
+                        <pre>{{ scope.row }}</pre>
+                    </template>
+                </el-table-column>
                 <el-table-column type="index" label="#"></el-table-column>
                 <el-table-column label="角色名称" prop="roleName"></el-table-column>
                 <el-table-column label="角色描述" prop="roleDesc"></el-table-column>
@@ -187,5 +200,14 @@
 </script>
 
 <style scoped lang="less">
+    .el-tag {
+        margin: 7px;
+    }
+    .dbtop {
+        border-top: 1px solid #eee;
+    }
+    .bdbottom {
+        border-bottom: 1px solid #eeeeee;
+    }
 
 </style>
