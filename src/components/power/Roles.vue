@@ -22,7 +22,7 @@
                         <el-row v-for="(item1, i1) in scope.row.children" :key="item1.id" :class="['bdbottom', i1 === 0 ? 'dbtop':'', 'vcenter']">
                             <!-- 渲染一级权限 -->
                             <el-col :span="5">
-                                <el-tag>{{item1.authName}}</el-tag>
+                                <el-tag closable @close="removeRightById(scope.row, item1.id)">{{item1.authName}}</el-tag>
                                 <i class="el-icon-caret-right"></i>
                             </el-col>
                             <!-- 渲染二、三级权限 -->
@@ -30,13 +30,14 @@
                                 <!-- 渲染二权限 -->
                                 <el-row v-for="(item2, i2) in item1.children" :key="item2.id" :class="[i2 !== 0 ? 'dbtop':'', 'vcenter']">
                                     <el-col :span="6">
-                                        <el-tag type="success">{{item2.authName}}</el-tag>
+                                        <el-tag type="success" closable @close="removeRightById(scope.row, item2.id)">{{item2.authName}}</el-tag>
                                         <i class="el-icon-caret-right"></i>
                                     </el-col>
                                     <!-- 渲染三权限 -->
                                     <el-col :span="18">
-                                        <el-tag type="warning" v-for="(item3) in item2.children" :key="item3.id">{{item2.authName}}</el-tag>
-                                        <i class="el-icon-caret-right"></i>
+                                        <el-tag type="warning" v-for="(item3) in item2.children" :key="item3.id"
+                                                closable @close="removeRightById(scope.row, item3.id)">{{item2.authName}}
+                                        </el-tag>
                                     </el-col>
                                 </el-row>
                             </el-col>
@@ -206,6 +207,25 @@
                 }
                 this.$message.success('删除成功！')
                 this.getRolesList()
+            },
+            // 根据ID删除对应的权限
+            async removeRightById(role, rightId) {
+                // 弹框提示是否删除对应权限
+                const confirmResult = await this.$confirm('此操作将永久删除该权限, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).catch(err => err)
+                if (confirmResult !== 'confirm') {
+                    return this.$message.info('已经取消删除')
+                }
+                // 如果用户确认删除，则返回值为字符串：confirm
+                const {data: res} = await this.$http.delete(`roles/${role.id}/rights/${rightId}`)
+                if (res.meta.status !== 200) {
+                    return this.$message.error('删除失败！')
+                }
+                this.$message.success('删除成功！')
+                role.children = res.data
             }
         }
     }
