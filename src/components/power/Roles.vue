@@ -19,16 +19,28 @@
                 <!-- 展开列 -->
                 <el-table-column type="expand" label="">
                     <template slot-scope="scope">
-                        <el-row v-for="(item1, i1) in scope.row.children" :key="item1.id" :class="['bdbottom', i1 === 0 ? 'dbtop':'']">
+                        <el-row v-for="(item1, i1) in scope.row.children" :key="item1.id" :class="['bdbottom', i1 === 0 ? 'dbtop':'', 'vcenter']">
                             <!-- 渲染一级权限 -->
                             <el-col :span="5">
                                 <el-tag>{{item1.authName}}</el-tag>
                                 <i class="el-icon-caret-right"></i>
                             </el-col>
                             <!-- 渲染二、三级权限 -->
-                            <el-col :span="19"></el-col>
+                            <el-col :span="19">
+                                <!-- 渲染二权限 -->
+                                <el-row v-for="(item2, i2) in item1.children" :key="item2.id" :class="[i2 !== 0 ? 'dbtop':'', 'vcenter']">
+                                    <el-col :span="6">
+                                        <el-tag type="success">{{item2.authName}}</el-tag>
+                                        <i class="el-icon-caret-right"></i>
+                                    </el-col>
+                                    <!-- 渲染三权限 -->
+                                    <el-col :span="18">
+                                        <el-tag type="warning" v-for="(item3) in item2.children" :key="item3.id">{{item2.authName}}</el-tag>
+                                        <i class="el-icon-caret-right"></i>
+                                    </el-col>
+                                </el-row>
+                            </el-col>
                         </el-row>
-                        <pre>{{ scope.row }}</pre>
                     </template>
                 </el-table-column>
                 <el-table-column type="index" label="#"></el-table-column>
@@ -208,6 +220,10 @@
     }
     .bdbottom {
         border-bottom: 1px solid #eeeeee;
+    }
+    .vcenter {
+        display: flex;
+        align-items: center;
     }
 
 </style>
