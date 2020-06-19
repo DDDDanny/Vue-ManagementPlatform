@@ -51,7 +51,7 @@
                     <template slot-scope="scope">
                         <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.id)">编辑</el-button>
                         <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeRoleByID(scope.row.id)">删除</el-button>
-                        <el-button type="warning" icon="el-icon-setting" size="mini">分配权限</el-button>
+                        <el-button type="warning" icon="el-icon-setting" size="mini" @click="showSetRightDialog(scope.row)">分配权限</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -86,6 +86,14 @@
                 <el-button type="primary" @click="editRoles" >确 定</el-button>
             </span>
         </el-dialog>
+        <!-- 分配权限的对话框 -->
+        <el-dialog title="分配权限" :visible.sync="setRightDialogVisible" width="35%" @close="setRightDialogClosed">
+            <el-tree :data="rightsList" :props="treeProps" show-checkbox node-key="id" default-expand-all :default-checked-keys="defKeys" ref="treeRef"></el-tree>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="setRightDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="allotRight">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -95,12 +103,21 @@
             return {
                 // 所有角色列表数据
                 roleList: [],
+                // 所有权限的数据
+                rightsList: [],
+                // 控制分配权限对话框的显示与隐藏
+                setRightDialogVisible: false,
                 // 控制添加角色对话框的显示与隐藏
                 addDialogVisible: false,
                 // 添加角色的表单数据
                 addForm: {
                     roleName: '',
                     roleDesc: '',
+                },
+                // 树形控件属性绑定对象
+                treeProps: {
+                    label: 'authName',
+                    children: 'children'
                 },
                 // 添加表单的验证规则对象
                 addFormRules: {
@@ -128,6 +145,10 @@
                 },
                 // 控制添加角色对话框的显示与隐藏
                 editDialogVisible: false,
+                // 默认选中的节点ID值数组
+                defKeys: [],
+                // 当前即将分配权限的角色ID
+                roleID: ''
             }
         },
         created() {
@@ -226,6 +247,47 @@
                 }
                 this.$message.success('删除成功！')
                 role.children = res.data
+            },
+            // 展示分配权限的对话框
+            async showSetRightDialog(role) {
+                this.roleID = role.id
+                // 获取所有权限的数据
+                const {data: res} = await this.$http.get('rights/tree')
+                if (res.meta.status !== 200){
+                    this.$message.error('获取权限失败')
+                }
+                // 把获取到的权限数据保存到data中
+                this.rightsList = res.data
+                // 获取三级节点ID
+                this.getLeafKeys(role, this.defKeys)
+                this.setRightDialogVisible = true
+            },
+            // 通过递归形式获取所有三级权限ID，并保存至数组中
+            getLeafKeys(node, arr) {
+                // 如果当前node节点不包含children属性，则是三级节点
+                if (!node.children) {
+                    return arr.push(node.id)
+                }
+                node.children.forEach(item => this.getLeafKeys(item, arr))
+            },
+            // 监听分配权限对话框的关闭事件
+            setRightDialogClosed() {
+                this.defKeys = []
+            },
+            // 点击为角色分配权限
+            async allotRight() {
+                const keys = [
+                    ...this.$refs.treeRef.getCheckedKeys(),
+                    ...this.$refs.treeRef.getHalfCheckedKeys()
+                ]
+                const idStr = keys.join(',')
+                const {data: res} = await this.$http.post(`roles/${this.roleID}/rights`, {rids: idStr})
+                if (res.meta.status !== 200) {
+                    return this.$message.error('更新权限失败')
+                }
+                this.$message.success('更新权限成功')
+                this.getRolesList()
+                this.setRightDialogVisible = false
             }
         }
     }
