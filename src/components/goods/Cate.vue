@@ -265,6 +265,7 @@
                     return this.$message.error('删除失败！')
                 }
                 this.$message.success('删除成功！')
+                this.queryInfo.pagenum = 1
                 this.getCateList()
             }
         }
