@@ -25,10 +25,10 @@
                         <!-- 展开列 -->
                         <el-table-column type="expand">
                             <template slot-scope="scope">
-                                <el-tag v-for="(item, i) in scope.row.attr_vals" :key="i" closable>{{ item }}</el-tag>
+                                <el-tag v-for="(item, i) in scope.row.attr_vals" :key="i" closable @close="handleClose(i, scope.row)">{{ item }}</el-tag>
                                 <el-input class="input-new-tag" v-if="scope.row.inputVisible" v-model="scope.row.inputValue"
                                         ref="saveTagInput" size="small"
-                                        @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm"></el-input>
+                                        @keyup.enter.native="handleInputConfirm(scope.row)" @blur="handleInputConfirm(scope.row)"></el-input>
                                 <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag</el-button>
                             </template>
                         </el-table-column>
@@ -51,7 +51,11 @@
                         <!-- 展开列 -->
                         <el-table-column type="expand">
                             <template slot-scope="scope">
-                                <el-tag v-for="(item, i) in scope.row.attr_vals" :key="i" closable>{{ item }}</el-tag>
+                                <el-tag v-for="(item, i) in scope.row.attr_vals" :key="i" closable @close="handleClose(i, scope.row)">{{ item }}</el-tag>
+                                <el-input class="input-new-tag" v-if="scope.row.inputVisible" v-model="scope.row.inputValue"
+                                          ref="saveTagInput" size="small"
+                                          @keyup.enter.native="handleInputConfirm(scope.row)" @blur="handleInputConfirm(scope.row)"></el-input>
+                                <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag</el-button>
                             </template>
                         </el-table-column>
                         <!-- 索引列 -->
@@ -255,11 +259,43 @@
                 this.getParamsData()
             },
             // 文本框失去焦点或按下Enter都会触发
-            handleInputConfirm() {
-                console.log('ok')
+            handleInputConfirm(row) {
+                if (row.inputValue.trim().length === 0) {
+                    row.inputValue = ''
+                    row.inputVisible = false
+                    return
+                }
+               // 如果没有return 需要做后续的处理
+                row.attr_vals.push(row.inputValue.trim())
+                row.inputValue = ''
+                row.inputVisible = false
+                // 发起网络请求，保存编辑的数据
+                this.saveAttrVal(row)
+            },
+            // 将对attr_vals 的操作保存数据库
+            async saveAttrVal(row) {
+                const {data: res} = await this.$http.put(`categories/${this.cateId}/attributes/${row.attr_id}`, {
+                    attr_name: row.attr_name,
+                    attr_sel: row.attr_sel,
+                    attr_vals: row.attr_vals.join(',')
+                })
+                if (res.meta.status !== 200) {
+                    return this.$message.error('更新参数失败！')
+                }
+                this.$message.success('更新参数成功！')
             },
             showInput(row) {
                 row.inputVisible = true
+                // $nextTick方法的作用，就是当页面上元素被重新渲染后，才会执行回调函数中的代码
+                // eslint-disable-next-line no-unused-vars
+                this.$nextTick(_ => {
+                    this.$refs.saveTagInput.$refs.input.focus();
+                });
+            },
+            // 删除对应的参数可选项
+            handleClose(i, row) {
+                row.attr_vals.splice(i, 1)
+                this.saveAttrVal(row)
             }
         },
         computed: {
