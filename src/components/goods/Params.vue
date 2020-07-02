@@ -23,14 +23,22 @@
                     <!-- 动态参数表格 -->
                     <el-table :data="manyTabData" border stripe>
                         <!-- 展开列 -->
-                        <el-table-column type="expand"></el-table-column>
+                        <el-table-column type="expand">
+                            <template slot-scope="scope">
+                                <el-tag v-for="(item, i) in scope.row.attr_vals" :key="i" closable>{{ item }}</el-tag>
+                                <el-input class="input-new-tag" v-if="scope.row.inputVisible" v-model="scope.row.inputValue"
+                                        ref="saveTagInput" size="small"
+                                        @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm"></el-input>
+                                <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag</el-button>
+                            </template>
+                        </el-table-column>
                         <!-- 索引列 -->
                         <el-table-column label="#" type="index"></el-table-column>
                         <el-table-column label="参数名称" prop="attr_name"></el-table-column>
                         <el-table-column label="操作">
                             <template slot-scope="scope">
                                 <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.attr_id)">编辑</el-button>
-                                <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+                                <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeParamsByID(scope.row.attr_id)">删除</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -41,14 +49,18 @@
                     <!-- 静态属性表格 -->
                     <el-table :data="onlyTabData" border stripe>
                         <!-- 展开列 -->
-                        <el-table-column type="expand"></el-table-column>
+                        <el-table-column type="expand">
+                            <template slot-scope="scope">
+                                <el-tag v-for="(item, i) in scope.row.attr_vals" :key="i" closable>{{ item }}</el-tag>
+                            </template>
+                        </el-table-column>
                         <!-- 索引列 -->
                         <el-table-column label="#" type="index"></el-table-column>
                         <el-table-column label="属性名称" prop="attr_name"></el-table-column>
                         <el-table-column label="操作">
                             <template slot-scope="scope">
                                 <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.attr_id)">编辑</el-button>
-                                <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+                                <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeParamsByID(scope.row.attr_id)">删除</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -68,7 +80,7 @@
             </span>
         </el-dialog>
         <!-- 编辑参数的弹框 -->
-        <el-dialog :title="'编辑' + titleText" :visible.sync="editDialogVisible" width="50%">
+        <el-dialog :title="'编辑' + titleText" :visible.sync="editDialogVisible" width="50%" @close="editDialogClosed">
             <el-form :model="editForm" :rules="editFormRules" ref="editRuleFormRef" label-width="100px">
                 <el-form-item :label="titleText" prop="attr_name">
                     <el-input v-model="editForm.attr_name"></el-input>
@@ -123,7 +135,7 @@
                     attr_name: [
                         { required: true, message: '请输入参数名称', trigger: 'blur' }
                     ]
-                }
+                },
             }
         },
         created() {
@@ -156,6 +168,14 @@
                 if (res.meta.status !== 200) {
                     return this.$message.error('获取列表数据失败！')
                 }
+                res.data.forEach(item => {
+                    item.attr_vals = item.attr_vals ? item.attr_vals.split(',') : []
+                    // 控制文本框的显示与隐藏
+                    item.inputVisible = false
+                    // 文本框输入的值
+                    item.inputValue = ''
+                 })
+                console.log(res.data)
                 if (this.activeName === 'many') {
                     this.manyTabData = res.data
                 }else {
@@ -181,6 +201,10 @@
                     this.addDialogVisible = false
                     this.getParamsData()
                 })
+            },
+            // 监听编辑对话框的关闭事件
+            editDialogClosed(){
+                this.$refs.editRuleFormRef.resetFields()
             },
             // 展示编辑信息对话框
             async showEditDialog(id) {
@@ -212,6 +236,30 @@
                     this.editDialogVisible = false
 
                 })
+            },
+            // 点击删除按钮，删除参数信息
+            async removeParamsByID(id) {
+                const confirmResult = await this.$confirm('此操作将永久删除该参数, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).catch(err => err)
+                if (confirmResult !== 'confirm') {
+                    return this.$message.info('已经取消删除')
+                }
+                const {data: res} = await this.$http.delete(`categories/${this.cateId}/attributes/${id}`)
+                if (res.meta.status !== 200) {
+                    return this.$message.error('删除失败！')
+                }
+                this.$message.success('删除成功！')
+                this.getParamsData()
+            },
+            // 文本框失去焦点或按下Enter都会触发
+            handleInputConfirm() {
+                console.log('ok')
+            },
+            showInput(row) {
+                row.inputVisible = true
             }
         },
         computed: {
@@ -242,5 +290,11 @@
 <style scoped lang="less">
     .cat_opt {
         margin: 15px 0;
+    }
+    .el-tag {
+        margin: 10px;
+    }
+    .input-new-tag {
+        width: 120px;
     }
 </style>
