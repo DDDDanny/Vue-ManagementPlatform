@@ -19,3 +19,9 @@ html, body, #app{
 .el-pagination {
     margin-top: 15px;
 }
+.el-steps {
+    margin: 20px 220px;
+}
+.el-step__title {
+    font-size: 10px;
+}
