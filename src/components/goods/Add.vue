@@ -21,7 +21,7 @@
             </el-steps>
             <!-- Tab组件 -->
             <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="100px" label-position="top">
-                <el-tabs :tab-position="'left'" style="margin: 50px" v-model="activeIndex">
+                <el-tabs :tab-position="'left'" style="margin: 50px" v-model="activeIndex" :before-leave="beforeTabLeave">
                     <el-tab-pane label="基本信息" name="0">
                         <el-form-item label="商品名称" prop="goods_name">
                             <el-input v-model="addForm.goods_name"></el-input>
@@ -105,6 +105,12 @@
             // 级联选择器选中变化，会触发这个函数
             handleChange() {
                 console.log('hah')
+            },
+            beforeTabLeave(activeName, oldActiveName) {
+                if (oldActiveName === '0' && this.addForm.goods_cat.length !== 3) {
+                    this.$message.error('请选择商品分类')
+                    return false
+                }
             }
         }
     }
