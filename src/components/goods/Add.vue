@@ -21,7 +21,7 @@
             </el-steps>
             <!-- Tab组件 -->
             <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="100px" label-position="top">
-                <el-tabs :tab-position="'left'" style="margin: 50px" v-model="activeIndex" :before-leave="beforeTabLeave">
+                <el-tabs :tab-position="'left'" style="margin: 50px" v-model="activeIndex" :before-leave="beforeTabLeave" @tab-click="tabClick">
                     <el-tab-pane label="基本信息" name="0">
                         <el-form-item label="商品名称" prop="goods_name">
                             <el-input v-model="addForm.goods_name"></el-input>
@@ -41,7 +41,13 @@
                             </el-cascader>
                         </el-form-item>
                     </el-tab-pane>
-                    <el-tab-pane label="商品参数" name="1">商品参数</el-tab-pane>
+                    <el-tab-pane label="商品参数" name="1">
+                        <el-form-item :label="item.attr_name" v-for="item in manyTabData" :key="item.attr_id">
+                            <el-checkbox-group v-model="item.attr_vals">
+                                <el-checkbox :label="cb" v-for="(cb, i) in item.attr_vals" :key="i" border></el-checkbox>
+                            </el-checkbox-group>
+                        </el-form-item>
+                    </el-tab-pane>
                     <el-tab-pane label="商品属性" name="2">商品属性</el-tab-pane>
                     <el-tab-pane label="商品图片" name="3">商品图片</el-tab-pane>
                     <el-tab-pane label="商品内容" name="4">商品内容</el-tab-pane>
@@ -87,8 +93,8 @@
                     label: 'cat_name',
                     value: 'cat_id',
                     children: 'children'
-                }
-
+                },
+                manyTabData: []
             }
         },
         created() {
@@ -111,11 +117,37 @@
                     this.$message.error('请选择商品分类')
                     return false
                 }
+            },
+            async tabClick() {
+                if (this.activeIndex === '1') {
+                    const {data: res} = await this.$http.get(`categories/${this.cateId}/attributes`,
+                        {
+                            params: {sel: 'many'}
+                        })
+                    if (res.meta.status !== 200) {
+                        return this.$message.error('获取动态参数失败！')
+                    }
+                    res.data.forEach(item => {
+                        item.attr_vals = item.attr_vals.length === 0 ? [] : item.attr_vals.split(',')
+                    })
+                    this.manyTabData = res.data
+                }
+            }
+        },
+        computed: {
+            cateId() {
+                if (this.addForm.goods_cat.length === 3) {
+                    return this.addForm.goods_cat[2]
+                }else {
+                    return null
+                }
             }
         }
     }
 </script>
 
-<style scoped>
-
+<style scoped lang="less">
+    .el-checkbox {
+        margin: 0 10px 0 0 !important;
+    }
 </style>
