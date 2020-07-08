@@ -89,7 +89,8 @@
                     goods_number: 0,
                     goods_cat: [],
                     pics: [],
-                    goods_introduce: ''
+                    goods_introduce: '',
+                    attrs: []
                 },
                 addFormRules: {
                     goods_name: [
@@ -195,9 +196,26 @@
                         return this.$message.error('请填写必要的表单项！')
                     }
                     // 执行添加的业务逻辑
-                    // 深拷贝  lodash
+                    // 深拷贝  lodash 处理good_cat
                     const form = _.cloneDeep(this.addForm)
                     form.goods_cat = form.goods_cat.join(',')
+                    // 处理动态参数
+                    this.manyTabData.forEach(item => {
+                        const newInfo = {
+                            attr_id: item.attr_id,
+                            attr_value: item.attr_vals.join(',')
+                        }
+                        this.addForm.attrs.push(newInfo)
+                    })
+                    // 处理静态属性
+                    this.onlyTabData.forEach(item => {
+                        const newInfo = {
+                            attr_id: item.attr_id,
+                            attr_value: item.attr_vals
+                        }
+                        this.addForm.attrs.push(newInfo)
+                    })
+                    form.attrs = this.addForm.attrs
                     console.log(form)
                 })
             }
