@@ -53,7 +53,14 @@
                             <el-input v-model="item.attr_vals"></el-input>
                         </el-form-item>
                     </el-tab-pane>
-                    <el-tab-pane label="商品图片" name="3">商品图片</el-tab-pane>
+                    <el-tab-pane label="商品图片" name="3">
+                        <!-- action 表示图片要上传的Api地址 -->
+                        <el-upload :action="this.uploadURL" :on-preview="handlePreview" :on-remove="handleRemove"
+                                   list-type="picture" :headers="headerObj" :on-success="handleSuccess">
+                            <el-button size="small" type="primary">点击上传</el-button>
+                            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                        </el-upload>
+                    </el-tab-pane>
                     <el-tab-pane label="商品内容" name="4">商品内容</el-tab-pane>
                 </el-tabs>
             </el-form>
@@ -72,7 +79,8 @@
                     goods_price: 0,
                     goods_weight: 0,
                     goods_number: 0,
-                    goods_cat: []
+                    goods_cat: [],
+                    pics: []
                 },
                 addFormRules: {
                     goods_name: [
@@ -100,6 +108,11 @@
                 },
                 manyTabData: [],
                 onlyTabData: [],
+                uploadURL: 'http://127.0.0.1:8888/api/private/v1/upload',
+                // 图片上传组件的请求头
+                headerObj: {
+                    Authorization: window.sessionStorage.getItem('token')
+                }
             }
         },
         created() {
@@ -146,6 +159,23 @@
                     }
                     this.onlyTabData = res.data
                 }
+            },
+            // 处理图片预览效果
+            handlePreview() {
+
+            },
+            // 处理移除图片的操作
+            handleRemove(file) {
+                const filePath = file.response.data.tmp_path
+                const i = this.addForm.pics.findIndex(x => x.pic ===  filePath)
+                this.addForm.pics.splice(i, 1)
+                console.log(this.addForm)
+            },
+            // 监听图片上传成功的事件
+            handleSuccess(response) {
+                const pic = {pic: response.data.tmp_path}
+                this.addForm.pics.push(pic)
+                console.log(this.addForm.pics)
             }
         },
         computed: {
