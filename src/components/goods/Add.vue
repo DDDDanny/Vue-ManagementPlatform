@@ -94,7 +94,8 @@
                     value: 'cat_id',
                     children: 'children'
                 },
-                manyTabData: []
+                manyTabData: [],
+                onlyTabData: [],
             }
         },
         created() {
@@ -131,6 +132,15 @@
                         item.attr_vals = item.attr_vals.length === 0 ? [] : item.attr_vals.split(',')
                     })
                     this.manyTabData = res.data
+                }else if (this.activeIndex === '2') {
+                    const {data: res} = await this.$http.get(`categories/${this.cateId}/attributes`,
+                        {
+                            params: {sel: 'only'}
+                        })
+                    if (res.meta.status !== 200) {
+                        return this.$message.error('获取静态属性失败！')
+                    }
+                    this.onlyTabData = res.data
                 }
             }
         },
