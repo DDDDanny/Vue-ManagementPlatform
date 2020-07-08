@@ -187,8 +187,14 @@
                 this.addForm.pics.push(pic)
                 console.log(this.addForm.pics)
             },
+            // 点击按钮，添加商品
             addGoods() {
-                console.log(this.addForm)
+                this.$refs.addFormRef.validate(valid => {
+                    if (!valid) {
+                        return this.$message.error('请填写必要的表单项！')
+                    }
+                    // 执行添加的业务逻辑
+                })
             }
         },
         computed: {
