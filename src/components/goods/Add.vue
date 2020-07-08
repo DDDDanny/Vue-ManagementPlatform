@@ -65,6 +65,9 @@
                 </el-tabs>
             </el-form>
         </el-card>
+        <el-dialog title="图片预览" :visible.sync="previewVisible" width="50%">
+            <img :src="this.previewPath" alt="" class="previewImg">
+        </el-dialog>
     </div>
 </template>
 
@@ -112,7 +115,9 @@
                 // 图片上传组件的请求头
                 headerObj: {
                     Authorization: window.sessionStorage.getItem('token')
-                }
+                },
+                previewPath: '',
+                previewVisible: false
             }
         },
         created() {
@@ -161,15 +166,15 @@
                 }
             },
             // 处理图片预览效果
-            handlePreview() {
-
+            handlePreview(file) {
+                this.previewPath = file.response.data.url
+                this.previewVisible = true
             },
             // 处理移除图片的操作
             handleRemove(file) {
                 const filePath = file.response.data.tmp_path
                 const i = this.addForm.pics.findIndex(x => x.pic ===  filePath)
                 this.addForm.pics.splice(i, 1)
-                console.log(this.addForm)
             },
             // 监听图片上传成功的事件
             handleSuccess(response) {
@@ -193,5 +198,8 @@
 <style scoped lang="less">
     .el-checkbox {
         margin: 0 10px 0 0 !important;
+    }
+    .previewImg {
+        width: 100%;
     }
 </style>
