@@ -61,7 +61,11 @@
                             <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
                         </el-upload>
                     </el-tab-pane>
-                    <el-tab-pane label="商品内容" name="4">商品内容</el-tab-pane>
+                    <el-tab-pane label="商品内容" name="4">
+                        <quill-editor v-model="addForm.goods_introduce"/>
+                        <!-- 添加商品的按钮 -->
+                        <el-button type="primary" class="btnAdd" @click="addGoods">添加商品</el-button>
+                    </el-tab-pane>
                 </el-tabs>
             </el-form>
         </el-card>
@@ -83,7 +87,8 @@
                     goods_weight: 0,
                     goods_number: 0,
                     goods_cat: [],
-                    pics: []
+                    pics: [],
+                    goods_introduce: ''
                 },
                 addFormRules: {
                     goods_name: [
@@ -181,6 +186,9 @@
                 const pic = {pic: response.data.tmp_path}
                 this.addForm.pics.push(pic)
                 console.log(this.addForm.pics)
+            },
+            addGoods() {
+                console.log(this.addForm)
             }
         },
         computed: {
@@ -201,5 +209,8 @@
     }
     .previewImg {
         width: 100%;
+    }
+    .btnAdd {
+        margin-top: 15px;
     }
 </style>
