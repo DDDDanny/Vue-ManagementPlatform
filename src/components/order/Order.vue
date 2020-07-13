@@ -34,7 +34,7 @@
                 </el-table-column>
                 <el-table-column label="操作">
                     <template >
-                        <el-button type="primary" icon="el-icon-edit" size="mini"></el-button>
+                        <el-button type="primary" icon="el-icon-edit" size="mini" @click="showBox"></el-button>
                         <el-button type="success" icon="el-icon-location" size="mini"></el-button>
                     </template>
                 </el-table-column>
@@ -46,6 +46,20 @@
                     :total="total">
             </el-pagination>
         </el-card>
+        <el-dialog title="修改地址" :visible.sync="addDialogVisible" width="50%" @close="addressDialogClosed">
+            <el-form :model="addressForm" :rules="addressFormRules" ref="addressFormRef" label-width="100px">
+                <el-form-item label="省市区\县" prop="address1">
+                    <el-input v-model="addressForm.address1"></el-input>
+                </el-form-item>
+                <el-form-item label="详细地址" prop="address2">
+                    <el-input v-model="addressForm.address2"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="addDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="addDialogVisible = false">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -59,7 +73,20 @@
                     pagesize: 10,
                 },
                 total: 0,
-                orderList: []
+                orderList: [],
+                addDialogVisible: false,
+                addressForm: {
+                    address1: [],
+                    address2: ''
+                },
+                addressFormRules: {
+                    address1: [
+                        { required: true, message: '请选择省市区县', trigger: 'blur' }
+                    ],
+                    address2: [
+                        { required: true, message: '请填写详细地址', trigger: 'blur' }
+                    ]
+                }
             }
         },
         created() {
@@ -81,6 +108,12 @@
             handleCurrentChange(newPage) {
                 this.queryInfo.pagenum = newPage
                 this.getOrderList()
+            },
+            showBox() {
+                this.addDialogVisible = true
+            },
+            addressDialogClosed() {
+                this.$refs.addressFormRef.resetFields()
             }
         }
     }
